@@ -1,0 +1,21 @@
+<launch>
+
+    <arg name="path" default="test_animation"/> <!-- if relavtive saved in ~/.ros/ -->
+    <arg name="sub_path" default=""/>
+    <arg name="save_urdf" default="true"/>
+    <arg name="save_mesh_deps" default="true"/>
+    <arg name="create_def_proj" default="true"/>
+
+    <node if="$(arg save_mesh_deps)" name="get_mesh_deps" pkg="get_urdf_deps" type="get_mesh_deps" output="screen">
+        <param name="path" value="$(arg path)$(arg sub_path)"/>
+    </node>
+
+    <node if="$(arg save_urdf)" name="save_urdf" pkg="get_urdf_deps" type="save_urdf" output="screen">
+        <param name="path" value="$(arg path)$(arg sub_path)"/>
+    </node>
+
+    <node if="$(arg create_def_proj)" name="create_def_proj" pkg="get_urdf_deps" type="create_def_proj" output="screen">
+        <param name="path" value="$(arg path)"/>
+    </node>
+
+</launch>

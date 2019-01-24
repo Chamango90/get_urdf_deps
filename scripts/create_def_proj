@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+
+import json
+import rospy
+from utilities import read_param, save_to_file
+
+default_project = json.dumps(
+    {
+        "name": "test_animation",
+        "scripts": {"start": "webpack-dev-server --open", "build": "webpack"},
+        "license": "Apache-2.0",
+        "dependencies": {"urdf-animation": "^1.0.9"},
+        "devDependencies": {
+            "script-loader": "^0.7.0",
+            "wc-loader": "^1.1.12",
+            "webpack": "^3.0.0",
+            "webpack-dev-server": "^2.5.0",
+        },
+    },
+    indent=4,
+    ensure_ascii=False,
+)
+
+
+def main():
+    rospy.init_node("save_urdf", anonymous=True)
+    path, name = rospy.get_param("~path", "."), "package.json"
+    save_to_file(default_project, path, name)
+
+
+if __name__ == "__main__":
+    main()

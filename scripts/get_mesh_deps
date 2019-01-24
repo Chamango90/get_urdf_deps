@@ -1,0 +1,95 @@
+#!/usr/bin/env python
+
+import git
+import rospkg
+import rospy
+import subprocess
+from urdf_parser_py.urdf import URDF, Mesh
+from utilities import save_to_file, wait_for_param
+import yaml
+
+
+def get_mesh_pkgs(key="/robot_description"):
+    def parse_name(path):
+        return path.split("//")[1].split("/")[0]
+
+    wait_for_param(key)
+    return set(
+        [
+            parse_name(l.visual.geometry.filename)
+            for l in URDF.from_parameter_server(key).links
+            if l.visual
+            if isinstance(l.visual.geometry, Mesh)
+        ]
+    )
+
+
+def find_release_url(pkg):
+    rospy.loginfo("Try to find release of pkg '%s'." % pkg)
+    return subprocess.check_output(("roslocate", "info", pkg))
+
+
+def find_git_url(pkg):
+    git_https = "https://github.com/"
+    git_ssh = "git@github.com:"
+
+    def parse_git_url(path):
+        if path.startswith(git_https):
+            return path.rstrip("/")
+        elif path.startswith(git_ssh):
+            return git_https + path.split(git_ssh)[1].split(".git")[0]
+        else:
+            raise ValueError("Git url '%s' cannot be parsed." % path)
+
+    rospy.loginfo("Try to find git repo of local pkg '%s'." % pkg)
+    rospack = rospkg.RosPack()
+    repo = git.Repo(rospack.get_path(pkg), search_parent_directories=True)
+    uri = parse_git_url(repo.remote("origin").url)
+    branch = repo.active_branch.name
+    return wstool_format(pkg, uri, branch)
+
+
+def wstool_format(pkg, uri, branch):
+    return yaml.safe_dump(
+        [{"git": {"local-name": pkg, "uri": uri, "version": branch}}],
+        default_flow_style=False,
+    )
+
+
+def get_urdf_deps():
+    pkgs = get_mesh_pkgs()
+    sources = ""
+    pkgs.add("fail")
+    for pkg in pkgs:
+        try:
+            s = find_git_url(pkg)
+        except (
+            git.exc.NoSuchPathError,
+            rospkg.common.ResourceNotFound,
+            KeyError,
+            ValueError,
+        ) as e:
+            rospy.loginfo("Git repo of '%s' not found:\n%s" % (pkg, e))
+            try:
+                s = find_release_url(pkg)
+            except subprocess.CalledProcessError:
+                rospy.loginfo("Release of '%s' not found." % pkg)
+                rospy.logwarn(
+                    """Could not find url for pkg '%s'!
+                    You might need to add it manually to the urdf_deps!"""
+                    % pkg
+                )
+                continue
+        sources += s
+        rospy.loginfo("Added pkg '%s'." % pkg)
+    return sources
+
+
+def main():
+    rospy.init_node("get_list", anonymous=True)
+    path, name = rospy.get_param("~path", "."), "urdf_deps.rosinstall"
+    save_to_file(get_urdf_deps(), path, name)
+
+
+if __name__ == "__main__":
+    main()

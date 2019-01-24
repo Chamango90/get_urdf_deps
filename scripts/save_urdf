@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+
+import rospy
+from utilities import read_param, save_to_file
+
+
+def main():
+    rospy.init_node("save_urdf", anonymous=True)
+    path, name = rospy.get_param("~path", "."), "model.urdf"
+    save_to_file(read_param("/robot_description"), path, name)
+
+
+if __name__ == "__main__":
+    main()

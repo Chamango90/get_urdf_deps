@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>get_urdf_deps</name>
+  <version>0.0.1</version>
+  <description>The get_urdf_deps package</description>
+  <maintainer email="jonathan.hechtbauer@ipa.fraunhofer.de">Jonathan Hechtbauer</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+
+
+  <exec_depend>python-git</exec_depend>
+  <exec_depend>python-rospkg</exec_depend>
+  <exec_depend>python-yaml</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>urdfdom_py</exec_depend>
+
+import giturlparse  # pip install giturlparse.py
+
+  <export>
+  </export>
+</package>
