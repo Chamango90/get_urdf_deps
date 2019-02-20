@@ -9,7 +9,7 @@ default_project = json.dumps(
         "name": "test_animation",
         "scripts": {"start": "webpack-dev-server --open", "build": "webpack"},
         "license": "Apache-2.0",
-        "dependencies": {"urdf-animation": "^1.0.9"},
+        "dependencies": {"urdf-animation": "^1.1.0"},
         "devDependencies": {
             "script-loader": "^0.7.0",
             "wc-loader": "^1.1.12",
