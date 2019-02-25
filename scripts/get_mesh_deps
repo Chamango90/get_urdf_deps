@@ -87,7 +87,7 @@ def get_urdf_deps():
 
 def main():
     rospy.init_node("get_list", anonymous=True)
-    path, name = rospy.get_param("~path", "."), "urdf_deps.rosinstall"
+    path, name = rospy.get_param("~path", "."), "urdf_pkgs.rosinstall"
     save_to_file(get_urdf_deps(), path, name)
 
 
